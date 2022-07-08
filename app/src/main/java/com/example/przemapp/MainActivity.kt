@@ -1,16 +1,24 @@
 package com.example.przemapp
 
 
+import android.animation.ValueAnimator
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.GestureDetector
 import android.view.MotionEvent
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import kotlin.math.abs
 import androidx.fragment.app.Fragment
+import kotlin.concurrent.thread
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.produce
+
 
 class MainActivity : AppCompatActivity(), GestureDetector.OnGestureListener{
 
@@ -18,59 +26,92 @@ class MainActivity : AppCompatActivity(), GestureDetector.OnGestureListener{
     var x2 = 0.0f
     var y1 = 0.0f
     var y2 = 0.0f
-    lateinit var gestureDetector: GestureDetector
+
+    private lateinit var gestureDetector: GestureDetector
+
     companion object {
         const val MIN_DISTANCE = 150
     }
 
     var counter = 0
 
-    fun mill(view: TextView){
-        val wiatrak = listOf<String>("---", """\""", "|", "/")
-        Thread.sleep(500)
-        GlobalScope.launch {
-            wiatrak.forEach(){
-                view.text = it
-                delay(100)
-            }
+    fun startAnimation(textView: TextView) {
+        val animator = ValueAnimator.ofInt(0, 600)
+        animator.duration = 50000 // 50 seconds
+        animator.addUpdateListener { animation ->
+            textView.text = animation.animatedValue.toString()
         }
-//        view.text = ""
+        animator.start()
     }
 
-//    @DelicateCoroutinesApi
-//    private fun callWiatrak() = runBlocking{
-//        val job = GlobalScope.launch {
-//        mill(textView)
-//        }
-//        job.join()
-//    }
+    fun mill(textView: TextView){
+        Thread.sleep(500L)
+        GlobalScope.launch {
+            val lista = listOf<String>("---", """ \""", " |", " /")
+            for (i in 1..100){
+                lista.forEach(){
+                    textView.text = it
+                    delay(40)
+                }
+                textView.text = ""
+            }
+        }
+    }
+
+    fun windMill(textView: TextView){
+        val wiatrak = listOf<String>("---", """\""", "|", "/", "---", """\""", "|", "/", "---", """\""", "|", "/", "---", """\""", "|", "/")
+        for (k in 1..100){
+            for (i in 0 until wiatrak.size) {
+                Handler(Looper.myLooper()!!).postDelayed({
+                    textView.text = "             ${wiatrak[i]}"
+                    textView.append("  k = $k")
+                }, 5000 + i.toLong() * 2000)
+            }
+
+        }
+    }
 
     private fun loadFragment(fragment: Fragment){
         supportFragmentManager
             .beginTransaction()
             .replace(R.id.fragmentContainerView, fragment)
-            .commitNow()
+            .commit()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        gestureDetector = GestureDetector(this, this)
+        val button: Button = findViewById<Button>(R.id.button)
+        val button2: Button = findViewById<Button>(R.id.button2)
+        val textView: TextView = findViewById<TextView>(R.id.textView)
+        textView.isSelected = true
+
+
 
         loadFragment(ScrollingFragment())
 
+        gestureDetector = GestureDetector(this, this)
+
         button.setOnClickListener {
-            mill(textView)
+            windMill(textView)
         }
 
         button2.setOnClickListener {
-            button2.text = supportFragmentManager.findFragmentById(R.id.fragmentContainerView).toString().substringBefore("{")
+            try{
+                button2.text = supportFragmentManager
+                    .findFragmentById(R.id.fragmentContainerView)
+                    .toString()
+                    .substringBefore("{")
+            } catch (e: Exception){
+                button2.text = e.toString()
+            }
         }
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         gestureDetector.onTouchEvent(event)
+
         when(event?.action){
             0->{
                 x1 = event.x
