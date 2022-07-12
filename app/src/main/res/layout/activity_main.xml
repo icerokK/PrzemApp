@@ -11,13 +11,14 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Computer Sentence Probability..........."
+        android:text="Niezły bajer Kolego Inereusz, co??..........."
+        android:textSize="45sp"
         android:singleLine="true"
         android:ellipsize="marquee"
         android:marqueeRepeatLimit="marquee_forever"
         android:scrollHorizontally="true"/>
 <!--        android:textDirection="rtl"-->
-<!--        />-->
+
 
     <Button
         android:id="@+id/button"

@@ -14,10 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.*
 import kotlin.math.abs
 import androidx.fragment.app.Fragment
-import kotlin.concurrent.thread
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.produce
+import androidx.lifecycle.lifecycleScope
 
 
 class MainActivity : AppCompatActivity(), GestureDetector.OnGestureListener{
@@ -33,7 +30,26 @@ class MainActivity : AppCompatActivity(), GestureDetector.OnGestureListener{
         const val MIN_DISTANCE = 150
     }
 
-    var counter = 0
+    fun rotateFragment(){
+        Thread.sleep(500L)
+        lifecycleScope.launch {
+            val listaFrag = listOf<Fragment>(ScrollingFragment(), ScrollingFragment2(), ScrollingFragment3())
+            val button2 = findViewById<Button>(R.id.button2)
+            for (i in 1..25){
+                listaFrag.forEach(){
+                    button2.text = supportFragmentManager
+                        .findFragmentById(R.id.fragmentContainerView)
+                        .toString()
+                        .substringBefore("{")
+                    delay(800)
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainerView, it)
+                    .commit()
+                    delay(800)
+                }
+            }
+        }
+    }
 
     fun startAnimation(textView: TextView) {
         val animator = ValueAnimator.ofInt(0, 600)
@@ -46,8 +62,8 @@ class MainActivity : AppCompatActivity(), GestureDetector.OnGestureListener{
 
     fun mill(textView: TextView){
         Thread.sleep(500L)
-        GlobalScope.launch {
-            val lista = listOf<String>("---", """ \""", " |", " /")
+        lifecycleScope.launch {
+            val lista = listOf<String>("              ---", """               \""", "               |", "               /")
             for (i in 1..100){
                 lista.forEach(){
                     textView.text = it
@@ -55,6 +71,7 @@ class MainActivity : AppCompatActivity(), GestureDetector.OnGestureListener{
                 }
                 textView.text = ""
             }
+            textView.text = "Marysiowi też się spodoba;)............."
         }
     }
 
@@ -87,14 +104,18 @@ class MainActivity : AppCompatActivity(), GestureDetector.OnGestureListener{
         val textView: TextView = findViewById<TextView>(R.id.textView)
         textView.isSelected = true
 
-
-
         loadFragment(ScrollingFragment())
 
         gestureDetector = GestureDetector(this, this)
 
         button.setOnClickListener {
-            windMill(textView)
+            try{
+                rotateFragment()
+
+//                startAnimation(textView)
+            } catch (e:Exception){
+                textView.text = e.toString()
+            }
         }
 
         button2.setOnClickListener {
@@ -165,7 +186,8 @@ class MainActivity : AppCompatActivity(), GestureDetector.OnGestureListener{
     }
 
     override fun onSingleTapUp(p0: MotionEvent?): Boolean {
-        //TODO("Not yet implemented")
+        val textView = findViewById<TextView>(R.id.textView)
+        startAnimation(textView)
         return false
     }
 
@@ -175,7 +197,9 @@ class MainActivity : AppCompatActivity(), GestureDetector.OnGestureListener{
     }
 
     override fun onLongPress(p0: MotionEvent?) {
-        //TODO("Not yet implemented")
+        val textView = findViewById<TextView>(R.id.textView)
+        mill(textView)
+
     }
 
     override fun onFling(p0: MotionEvent?, p1: MotionEvent?, p2: Float, p3: Float): Boolean {
