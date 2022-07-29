@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity(), GestureDetector.OnGestureListener{
         const val MIN_DISTANCE = 150
     }
 
-    fun rotateFragment(){
+    private fun rotateFragment(){
         Thread.sleep(500L)
         lifecycleScope.launch {
             val listaFrag = listOf<Fragment>(ScrollingFragment(), ScrollingFragment2(), ScrollingFragment3())
@@ -42,14 +42,10 @@ class MainActivity : AppCompatActivity(), GestureDetector.OnGestureListener{
                     viewModel.setString(supportFragmentManager
                         .findFragmentById(R.id.fragmentContainerView)
                         .toString()
-                        .substringBefore("{"))
-
+                        .substringBefore("{")
+                    )
                     delay(800)
-
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainerView, it)
-                        .commit()
-
+                    loadFragment(it)
                     delay(800)
                 }
             }
