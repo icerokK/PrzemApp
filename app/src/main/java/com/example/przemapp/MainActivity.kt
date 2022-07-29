@@ -1,23 +1,25 @@
 package com.example.przemapp
 
-
 import android.animation.ValueAnimator
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.TextUtils.replace
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.*
 import kotlin.math.abs
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 
-
 class MainActivity : AppCompatActivity(), GestureDetector.OnGestureListener{
+    private val viewModel : MainViewModel by viewModels()
 
     var x1 = 0.0f
     var x2 = 0.0f
@@ -37,14 +39,17 @@ class MainActivity : AppCompatActivity(), GestureDetector.OnGestureListener{
             val button2 = findViewById<Button>(R.id.button2)
             for (i in 1..25){
                 listaFrag.forEach(){
-                    button2.text = supportFragmentManager
+                    viewModel.setString(supportFragmentManager
                         .findFragmentById(R.id.fragmentContainerView)
                         .toString()
-                        .substringBefore("{")
+                        .substringBefore("{"))
+
                     delay(800)
-                supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragmentContainerView, it)
-                    .commit()
+
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainerView, it)
+                        .commit()
+
                     delay(800)
                 }
             }
@@ -62,11 +67,12 @@ class MainActivity : AppCompatActivity(), GestureDetector.OnGestureListener{
 
     fun mill(textView: TextView){
         Thread.sleep(500L)
-        lifecycleScope.launch {
+        MainScope().launch {
             val lista = listOf<String>("              ---", """               \""", "               |", "               /")
             for (i in 1..100){
                 lista.forEach(){
-                    textView.text = it
+                    viewModel.setString2(it)
+                    textView.text = viewModel.getString2()
                     delay(40)
                 }
                 textView.text = ""
@@ -89,9 +95,13 @@ class MainActivity : AppCompatActivity(), GestureDetector.OnGestureListener{
     }
 
     private fun loadFragment(fragment: Fragment){
-        supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.fragmentContainerView, fragment)
+        supportFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.left_to_right,
+                0,
+                0,
+                0
+        ).replace(R.id.fragmentContainerView, fragment)
             .commit()
     }
 
